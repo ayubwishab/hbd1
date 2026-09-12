@@ -1,1 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Selamat Ulang Tahun, Sayang! ❤️</title>
+  <!-- Google Fonts & Canvas Confetti -->
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <style>
+    :root {
+      --primary: #ff4b72;
+      --secondary: #ff85a1;
+      --bg: #fff0f3;
+      --card-bg: #ffffff;
+    }
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      color: #4a4a4a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* Screen Management */
+    .screen {
+      display: none;
+      animation: fadeIn 0.8s ease-in-out forwards;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* PIN Lock Screen */
+    .lock-card {
+      background: var(--card-bg);
+      padding: 30px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(255, 75, 114, 0.15);
+    }
+
+    .lock-card h2 {
+      color: var(--primary);
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+
+    .pin-input {
+      width: 80%;
+      padding: 12px;
+      border: 2px solid var(--secondary);
+      border-radius: 25px;
+      text-align: center;
+      font-size: 1.1rem;
+      margin: 20px 0;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .pin-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 8px rgba(255, 75, 114, 0.3);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 75, 114, 0.3);
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #e03a5f;
+      transform: translateY(-2px);
+    }
+
+    /* Main Content */
+    .header-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2.8rem;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    /* Photo Gallery (Polaroid Style) */
+    .gallery {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      padding: 10px 5px 20px 5px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .gallery::-webkit-scrollbar {
+      display: none;
+    }
+
+    .polaroid {
+      flex: 0 0 220px;
+      scroll-snap-align: center;
+      background: white;
+      padding: 12px 12px 20px 12px;
+      border-radius: 12px;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+      transform: rotate(-2deg);
+      transition: 0.3s;
+    }
+
+    .polaroid:nth-child(even) {
+      transform: rotate(2deg);
+    }
+
+    .polaroid:hover {
+      transform: scale(1.05) rotate(0deg);
+    }
+
+    .polaroid img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .polaroid p {
+      margin-top: 10px;
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.2rem;
+      color: #333;
+    }
+
+    /* Letter Section */
+    .letter-card {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      margin-top: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      text-align: left;
+      line-height: 1.7;
+    }
+
+    .letter-card p {
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    .signature {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.8rem;
+      color: var(--primary);
+      text-align: right;
+      margin-top: 15px;
+    }
+
+    /* Floating Heart Music Control */
+    .music-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .error-msg {
+      color: #ff3333;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Audio Player (Ganti src dengan lagu favorit kalian) -->
+  <audio id="bg-music" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- Tombol Musik -->
+  <button class="music-btn" onclick="toggleMusic()" id="music-icon">🎵</button>
+
+  <div class="container">
+    
+    <!-- 1. LOCK SCREEN -->
+    <div id="lock-screen" class="screen active">
+      <div class="lock-card">
+        <h2>🔒 Special Access</h2>
+        <p style="font-size: 0.9rem; color: #666;">Masukkan Rahasia / Tanggal Spesial Kita<br><i>(Contoh PIN default: 1234)</i></p>
+        <input type="password" id="pin-input" class="pin-input" placeholder="Masukkan PIN" />
+        <br />
+        <button class="btn" onclick="checkPin()">Buka Hadiah ✨</button>
+        <p id="error-msg" class="error-msg">PIN salah, coba ingat-ingat lagi yuk! 🥺</p>
+      </div>
+    </div>
+
+    <!-- 2. MAIN CONTENT SCREEN -->
+    <div id="main-screen" class="screen">
+      <h1 class="header-title">Selamat Ulang Tahun! 🎉</h1>
+      <p class="subtitle">Untuk seseorang yang paling spesial dalam hidupku ❤️</p>
+
+      <!-- Photos Carousel -->
+      <div class="gallery">
+        <div class="polaroid">
+          <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=500&q=80" alt="Foto 1" />
+          <p>Momen Terindah 1</p>
+        </div>
+        <div class="polaroid">
+          <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=500&q=80" alt="Foto 2" />
+          <p>Senyuman Favoritku</p>
+        </div>
+        <div class="polaroid">
+          <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=500&q=80" alt="Foto 3" />
+          <p>Selalu Bersamamu</p>
+        </div>
+      </div>
+
+      <!-- Love Letter Section -->
+      <div class="letter-card">
+        <p><b>Hai Sayang,</b></p>
+        <p>Selamat ulang tahun ya! Terima kasih sudah hadir dan mewarnai hari-hariku dengan tawa dan kebahagiaan.</p>
+        <p>Semoga di usiamu yang baru ini, kamu selalu diberikan kesehatan, kebahagiaan, dan kemudahan dalam meraih mimpi-mimpimu. Aku akan selalu ada di sini untuk mendukungmu.</p>
+        <p>Tetaplah jadi dirimu yang luar biasa. <i>I love you so much!</i> ❤️</p>
+        <div class="signature">Dengan cinta,<br>Pasanganmu</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // PIN Rahasia (Bisa diubah sesuai keinginan, misal: tanggal lahir '2512')
+    const CORRECT_PIN = "1234";
+
+    function checkPin() {
+      const pinInput = document.getElementById("pin-input").value;
+      const errorMsg = document.getElementById("error-msg");
+      
+      if (pinInput === CORRECT_PIN) {
+        // Pindah Tampilan
+        document.getElementById("lock-screen").classList.remove("active");
+        document.getElementById("main-screen").classList.add("active");
+        
+        // Jalankan Musik & Efek Konfeti
+        playMusic();
+        triggerConfetti();
+      } else {
+        errorMsg.style.display = "block";
+      }
+    }
+
+    // Fungsi Konfeti Pesta
+    function triggerConfetti() {
+      const count = 200;
+      const defaults = { origin: { y: 0.7 } };
+
+      function fire(particleRatio, opts) {
+        confetti(Object.assign({}, defaults, opts, {
+          particleCount: Math.floor(count * particleRatio)
+        }));
+      }
+
+      fire(0.25, { spread: 26, startVelocity: 55 });
+      fire(0.2, { spread: 60 });
+      fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+      fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+      fire(0.1, { spread: 120, startVelocity: 45 });
+    }
+
+    // Control Audio
+    const music = document.getElementById("bg-music");
+    const musicBtn = document.getElementById("music-icon");
+    let isPlaying = false;
+
+    function playMusic() {
+      music.play().then(() => {
+        isPlaying = true;
+        musicBtn.innerText = "🎵";
+      }).catch(err => {
+        console.log("Autoplay blocked by browser");
+      });
+    }
+
+    function toggleMusic() {
+      if (isPlaying) {
+        music.pause();
+        musicBtn.innerText = "🔇";
+        isPlaying = false;
+      } else {
+        music.play();
+        musicBtn.innerText = "🎵";
+        isPlaying = true;
+      }
+    }
+  </script>
+</body>
+</html>
